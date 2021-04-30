@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React,{useState,useEffect} from 'react';
-import { StyleSheet, Text, View,PermissionsAndroid,Platform,Dimensions, Image,TouchableOpacity,Linking} from 'react-native';
+import { StyleSheet, Text, View,PermissionsAndroid,Platform,Dimensions,  Share,Image,TouchableOpacity,Linking} from 'react-native';
 import Geolocation from '@react-native-community/geolocation'
 import Constants from 'expo-constants';
 import * as Animatable from 'react-native-animatable';
@@ -13,7 +13,7 @@ export const windowWidthPx = Dimensions.get('window').width/100;
 export const windowHeightPx = Dimensions.get('window').height/100;
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {  FontAwesome5  as Icon } from '@expo/vector-icons';
+import {  AntDesign  as Icon } from '@expo/vector-icons';
 export default function App() {
 
  
@@ -132,7 +132,7 @@ const getCurrentLocation=()=>{
     (position) => {
        setLatitude(JSON.stringify(position.coords.latitude));
        setLongitude(JSON.stringify(position.coords.longitude))
-     //  alert(position.coords.latitude);
+      // alert(position.coords.latitude);
     },
     (error) => console.log(error.message),
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
@@ -173,10 +173,27 @@ if ( hideMe==false) {
   )
 
 }*/}
-let content = `Today's temperature in ${weather.cityName} is ${weather.temp} °c. Day's maximum temperature
-would hover at ${weather.maxTemp}°c, while minimum temperature is predicted to be ${weather.minTemp}°c.`
-shareToWhatsApp = (text) => {
-  Linking.openURL(`whatsapp://send?text=${text}`);
+
+const shareToWhatsApp = async() => {
+
+  try {
+    const result = await Share.share({
+      message:
+        `Today's temperature in ${weather.cityName} is ${weather.temp} °c. Day's maximum temperature
+         would hover at ${weather.maxTemp}°c, while minimum temperature is predicted to be ${weather.minTemp}°c.`,
+    });
+    if (result.action === Share.sharedAction) {
+      if (result.activityType) {
+        console.log('Share shared');
+      } else {
+        console.log('cancel');
+      }
+    } else if (result.action === Share.dismissedAction) {
+      console.log('Share dissmissed');
+    }
+  } catch (error) {
+    alert(error.message);
+  }
  }
 
   return (
@@ -185,7 +202,7 @@ shareToWhatsApp = (text) => {
 
     <View style={styles.container}>
 
-    {hideMe===true?(
+    {hideMe==true?(
     <View style={{flex:1,backgroundColor:'#f8f8f8'}}>
     <StatusBar style='auto'/> 
     
@@ -215,8 +232,8 @@ shareToWhatsApp = (text) => {
    
     
     <View>
-    <TouchableOpacity onPress={()=>shareToWhatsApp(content)} style={{margin:windowWidthPx*3,padding:windowWidthPx,alignSelf:'flex-end',width:windowWidthPx*14,borderRadius:50,backgroundColor:'#644749',justifyContent:'center',alignItems:'center'}}>
-    <Icon name="whatsapp" size={24} color={'#fff'} />
+    <TouchableOpacity onPress={()=>shareToWhatsApp() } style={{margin:windowWidthPx*3,padding:windowWidthPx,alignSelf:'flex-end',width:windowWidthPx*14,borderRadius:50,backgroundColor:'#644749',justifyContent:'center',alignItems:'center'}}>
+    <Icon name="sharealt" size={24} color={'#fff'} />
     <Text style={{fontFamily:'Regular',color:'#fff'}}>Share</Text>
     </TouchableOpacity>
     </View>
